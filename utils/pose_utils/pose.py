@@ -2,10 +2,10 @@ import cv2
 from numpy import imag
 import mediapipe as mp
 from mediapipe.python.solutions.drawing_utils import _normalized_to_pixel_coordinates
-from utils.operation_utils import Operation
 
-from ..drawing_utils import Draw
-from .const import POSE, PRESENCE_THRESHOLD, VISIBILITY_THRESHOLD
+from utils.operation_utils import Operation
+from utils.drawing_utils import Draw
+from utils.pose_utils.const import POSE, PRESENCE_THRESHOLD, VISIBILITY_THRESHOLD
 
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles

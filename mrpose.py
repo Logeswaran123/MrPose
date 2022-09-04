@@ -1,4 +1,5 @@
 import argparse
+
 from utils.exercise_utils import Exercise
 
 if __name__ == '__main__':

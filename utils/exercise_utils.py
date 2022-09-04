@@ -1,6 +1,7 @@
 import sys
-from .pose_utils.pose import Pushup
-from .video_reader_utils import VideoReader
+
+from utils.pose_utils.pose import Pushup
+from utils.video_reader_utils import VideoReader
 
 class Exercise():
     def __init__(self, filename: str, exercise: str) -> None:

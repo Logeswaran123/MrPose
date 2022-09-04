@@ -1,5 +1,4 @@
 VISIBILITY_THRESHOLD = 0.5
-
 PRESENCE_THRESHOLD = 0.5
 
 # Source: https://google.github.io/mediapipe/images/mobile/pose_tracking_full_body_landmarks.png
