@@ -15,6 +15,11 @@ pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
 class Pose():
     def __init__(self) -> None:
         self.operation = Operation()
+        self.pushup_counter = 0
+        self.plank_counter = 0
+        self.squat_counter = 0
+        self.pushups_ang1_tracker = []
+        self.pushups_ang4_tracker = []
 
     def pose_algorithm(self):
         raise NotImplementedError("Requires Subclass implementation.")
@@ -42,10 +47,11 @@ class Pushup(Pose):
             if landmark_px:
                 key_points[idx] = landmark_px
         return key_points
-    
+
     def pose_algorithm(self, key_points):
         ang1 = ang2 = None
         is_pushup = False
+        is_plank = False
 
         # Calculate angle between lines shoulder-elbow, elbow-wrist
         if POSE["left_shoulder"] in key_points and POSE["left_elbow"] in key_points and POSE["left_wrist"] in key_points:
@@ -71,7 +77,7 @@ class Pushup(Pose):
             right_shoulder = key_points[POSE["right_shoulder"]]
             right_hip = key_points[POSE["right_hip"]]
             right_ankle = key_points[POSE["right_ankle"]]
-            ang2 = self.operation.angle(right_shoulder, right_elbow, right_ankle)
+            ang2 = self.operation.angle(right_shoulder, right_hip, right_ankle)
         else:
             pass
 
@@ -91,13 +97,41 @@ class Pushup(Pose):
         else:
             pass
 
-        if ang3 is not None and ang3 <= 50:
-            if ang1 is not None or ang2 is not None:
+        # Calculate angle of line elbow-wrist
+        left_elbow_wrist = POSE["left_elbow"] in key_points and POSE["left_wrist"] in key_points
+        right_elbow_wrist = POSE["right_elbow"] in key_points and POSE["right_wrist"] in key_points
+        if left_elbow_wrist or right_elbow_wrist:
+            elbow = key_points[POSE["left_elbow"]] if left_elbow_wrist else key_points[POSE["right_elbow"]]
+            wrist = key_points[POSE["left_wrist"]] if left_elbow_wrist else key_points[POSE["right_wrist"]]
+            ang4 = self.operation.angle_of_singleline(elbow, wrist)
+        else:
+            pass
+
+        if ang3 is not None and ((0 <= ang3 <= 50) or (130 <= ang3 <= 180)):
+            if (ang1 is not None or ang2 is not None) and ang4 is not None:
                 if (160 <= ang2 <= 180) or (0 <= ang2 <= 20):
-                    is_pushup = True
+                    self.pushup_counter += 1
+                    self.pushups_ang1_tracker.append(ang1)
+                    self.pushups_ang4_tracker.append(ang4)
+
+        if self.pushup_counter >= 24 and len(self.pushups_ang1_tracker) == 24 and len(self.pushups_ang4_tracker) == 24:
+            ang1_diff1 = abs(self.pushups_ang1_tracker[0] - self.pushups_ang1_tracker[12])
+            ang1_diff2 = abs(self.pushups_ang1_tracker[12] - self.pushups_ang1_tracker[23])
+            ang1_diff_mean = (ang1_diff1 + ang1_diff2) / 2
+            ang4_mean = sum(self.pushups_ang4_tracker) / len(self.pushups_ang4_tracker)
+            del self.pushups_ang1_tracker[0]
+            del self.pushups_ang4_tracker[0]
+            if ang1_diff_mean < 5 and not 75 <= ang4_mean <= 105:
+                is_plank = True
+                is_pushup = False
+            else:
+                is_pushup = True
+                is_plank = False
 
         if is_pushup:
             return "Pushup"
+        elif is_plank:
+            return "Plank"
 
         return None
 
