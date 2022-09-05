@@ -54,7 +54,19 @@ class Pose():
 
     def get_point(self, str_point):
         return self.key_points[POSE[str_point]] if self.is_point_in_keypoints(str_point) else None
-    
+
+    def get_available_point(self, points):
+        """
+        Get highest priority keypoint from points list.
+        i.e. first index is 1st priority, second index is 2nd priority, and so on.
+        """
+        available_point = None
+        for point in points:
+            if self.is_point_in_keypoints(point) and available_point is None:
+                available_point = self.get_point(point)
+                break
+        return available_point
+
     def two_line_angle(self, str_point1, str_point2, str_point3):
         coord1 = self.get_point(str_point1)
         coord2 = self.get_point(str_point2)
@@ -188,6 +200,7 @@ class Pushup(Pose):
         super().__init__(video_reader)
         self.video_reader = video_reader
         self.pushups_count = 0
+        self.is_pushup = False
 
     def _draw(self, image):
         left_shoulder_wrist_foot = self.is_point_in_keypoints("left_shoulder") and self.is_point_in_keypoints("left_wrist") and self.is_point_in_keypoints("left_foot_index")
@@ -205,7 +218,24 @@ class Pushup(Pose):
         return image
 
     def pose_algorithm(self):
-        pass
+        # Distance algorithm
+        head_point = self.get_available_point(["nose", "left_ear", "right_ear", "left_eye", "right_eye"])
+        ankle = self.get_available_point(["left_ankle", "right_ankle"])
+        if head_point is None or ankle is None:
+            return 0
+
+        diff_y = self.operation.dist_y(head_point, ankle)
+
+        # Angle algorithm
+        head_pos = self.operation.point_position(head_point, (self.width / 2, 0), (self.width / 2, self.height))
+        wrist = self.get_available_point(["left_wrist", "right_wrist"])
+        ang = self.operation.angle(head_point, ankle, wrist)
+        if diff_y < 250 and (ang < 40 and head_pos == "right") or (ang > 140 and head_pos == "left"):
+            self.is_pushup = True
+        if diff_y > 300 and self.is_pushup == True:
+            self.pushups_count += 1
+            self.is_pushup = False
+
 
     def measure(self) -> None:
         if self.video_reader.is_opened() == False:
@@ -227,7 +257,6 @@ class Pushup(Pose):
             image.flags.writeable = True
             image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
             image = self.draw.overlay(image)
-            # image = self.draw.skeleton(image, results)
 
             if results.pose_landmarks is not None:
                 self.key_points = self.get_keypoints(image, results)

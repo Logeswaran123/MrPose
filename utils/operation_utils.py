@@ -24,3 +24,27 @@ class Operation():
             return ang
         except:
             return 90.0
+    
+    def dist_xy(self, point1, point2):
+        """ Euclidean distance between two points point1, point2 """
+        diff_point1 = (point1[0] - point2[0]) ** 2
+        diff_point2 = (point1[1] - point2[1]) ** 2
+        return (diff_point1 + diff_point2) ** 0.5
+
+    def dist_x(self, point1, point2):
+        return abs(point2[0] - point1[0])
+
+    def dist_y(self, point1, point2):
+        return abs(point2[1] - point1[1])
+    
+    def point_position(self, point, line_pt_1, line_pt_2):
+        """
+        Left or Right position of the point from a line
+        Source: https://stackoverflow.com/a/62886424
+        """
+        value = (line_pt_2[0] - line_pt_1[0]) * (point[1] - line_pt_1[1]) - (line_pt_2[1] - line_pt_1[1]) * (point[0] - line_pt_1[0])
+        if value >= 0:
+            return "left"
+        else:
+            return "right"
+
