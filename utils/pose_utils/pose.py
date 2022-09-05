@@ -264,6 +264,7 @@ class Pushup(Pose):
             print("Error File Not Found.")
 
         out = cv2.VideoWriter("output.avi", self.fourcc, self.video_fps, (self.width, self.height))
+        pushup_count_prev = pushup_count_current = progress_counter = 0
         while self.video_reader.is_opened():
             image = self.video_reader.read_frame()
             if image is None:
@@ -276,15 +277,25 @@ class Pushup(Pose):
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             results = pose.process(image)
 
+            # overlay
             image.flags.writeable = True
             image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
             image = self.draw.overlay(image)
 
+            # progress bar
+            image = cv2.rectangle(image, (0, self.height//8 - 10), (self.width//10 * progress_counter, self.height//8),
+                                        (255, 255, 255), cv2.FILLED)
             if results.pose_landmarks is not None:
                 self.key_points = self.get_keypoints(image, results)
                 self.pose_algorithm()
                 image = self._draw(image)
                 image = self.draw.pose_text(image, "Pushups Count: " + str(self.pushups_count))
+                pushup_count_prev = pushup_count_current
+                pushup_count_current = self.pushups_count
+                if self.pushups_count > 0 and abs(pushup_count_current - pushup_count_prev) == 1:
+                    progress_counter += 1
+                    if progress_counter == 10:
+                        progress_counter = 0
 
             out.write(image)
             cv2.imshow('Pushups', image)
@@ -323,6 +334,7 @@ class Squat(Pose):
             print("Error File Not Found.")
 
         out = cv2.VideoWriter("output.avi", self.fourcc, self.video_fps, (self.width, self.height))
+        squads_count_prev = squad_count_current = progress_counter = 0
         while self.video_reader.is_opened():
             image = self.video_reader.read_frame()
             if image is None:
@@ -335,14 +347,24 @@ class Squat(Pose):
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             results = pose.process(image)
 
+            # overlay
             image.flags.writeable = True
             image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
             image = self.draw.overlay(image)
 
+            # progress bar
+            image = cv2.rectangle(image, (0, self.height//8 - 10), (self.width//10 * progress_counter, self.height//8),
+                                        (255, 255, 255), cv2.FILLED)
             if results.pose_landmarks is not None:
                 self.key_points = self.get_keypoints(image, results)
                 self.pose_algorithm()
                 image = self.draw.pose_text(image, "Squats Count: " + str(self.squats_count))
+                squads_count_prev = squad_count_current
+                squad_count_current = self.squats_count
+                if self.squats_count > 0 and abs(squad_count_current - squads_count_prev) == 1:
+                    progress_counter += 1
+                    if progress_counter == 10:
+                        progress_counter = 0
 
             out.write(image)
             cv2.imshow('Squats', image)
