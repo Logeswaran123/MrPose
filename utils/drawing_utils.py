@@ -27,7 +27,8 @@ class Draw():
     def pose_text(self, image, estimated_pose):
         pil_img = Image.fromarray(image)
         pil_draw = ImageDraw.Draw(pil_img)
-        pil_draw.text((self.width//2 - self.width//16, self.height//16 + 20), estimated_pose.upper(), (255, 255, 255), font=self.font)
+        w, _ = pil_draw.textsize(estimated_pose.upper(), font=self.font)
+        pil_draw.text(((self.width - w) / 2, self.height//16 + 20), estimated_pose.upper(), (255, 255, 255), font=self.font)
         image = np.array(pil_img)
         return image
 
@@ -37,3 +38,8 @@ class Draw():
         cv2.rectangle(overlay, (0, self.height//16), (self.width, self.height//8) , (25,25,25) , -1)
         image = cv2.addWeighted(overlay, alpha, image, 1 - alpha, 0)
         return image
+    
+    def draw_line(self, image, coord1, coord2):
+        cv2.line(image, coord1, coord2, thickness=4, color=(255, 255, 255))
+        return image
+        
