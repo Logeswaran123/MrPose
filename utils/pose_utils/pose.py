@@ -268,4 +268,59 @@ class Pushup(Pose):
             cv2.imshow('Pushups', image)
             if cv2.waitKey(5) & 0xFF == 27:
                 break
+        self.video_reader.release()
+
+
+class Squat(Pose):
+    def __init__(self, video_reader) -> None:
+        super().__init__(video_reader)
+        self.video_reader = video_reader
+        self.squats_count = 0
+        self.is_squat = False
+
+    def pose_algorithm(self):
+        # Distance algorithm
+        head_point = self.get_available_point(["nose", "left_ear", "right_ear", "left_eye", "right_eye"])
+        ankle = self.get_available_point(["left_ankle", "right_ankle"])
+        if head_point is None or ankle is None:
+            return 0
+
+        diff_y = self.operation.dist_y(head_point, ankle)
+        norm_diff_y = self.operation.normalize(diff_y, 0, self.height)
+        if norm_diff_y < 0.5:
+            self.is_squat = True
+        if norm_diff_y > 0.5 and self.is_squat == True:
+            self.squats_count += 1
+            self.is_squat = False
+
+    def measure(self) -> None:
+        if self.video_reader.is_opened() == False:
+            print("Error File Not Found.")
+
+        out = cv2.VideoWriter(f"output.avi", self.fourcc, self.video_fps, (self.width, self.height))
+        while self.video_reader.is_opened():
+            image = self.video_reader.read_frame()
+            if image is None:
+                print("Ignoring empty camera frame.")
+                break
+
+            # To improve performance, optionally mark the image as not writeable to
+            # pass by reference.
+            image.flags.writeable = False
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            results = pose.process(image)
+
+            image.flags.writeable = True
+            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+            image = self.draw.overlay(image)
+
+            if results.pose_landmarks is not None:
+                self.key_points = self.get_keypoints(image, results)
+                self.pose_algorithm()
+                image = self.draw.pose_text(image, "Squats Count: " + str(self.squats_count))
+
+            out.write(image)
+            cv2.imshow('Squats', image)
+            if cv2.waitKey(5) & 0xFF == 27:
+                break
         self.video_reader.release() 

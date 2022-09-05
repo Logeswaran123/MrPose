@@ -47,4 +47,7 @@ class Operation():
             return "left"
         else:
             return "right"
-
+    
+    def normalize(self, value, min_val, max_val):
+        """ Normalize to [0, 1] range """
+        return (value - min_val) / (max_val - min_val)
