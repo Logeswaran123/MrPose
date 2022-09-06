@@ -1,5 +1,4 @@
 import cv2
-import datetime
 import mediapipe as mp
 from mediapipe.python.solutions.drawing_utils import _normalized_to_pixel_coordinates
 import random
@@ -24,6 +23,7 @@ class Pose():
         self.ang1_tracker = []
         self.ang4_tracker = []
         self.pose_tracker = []
+        self.headpoint_tracker = []
         self.width = int(self.video_reader.get_frame_width())
         self.height = int(self.video_reader.get_frame_height())
         self.video_fps = self.video_reader.get_video_fps()
@@ -88,8 +88,7 @@ class Pose():
     def predict_pose(self):
         """ Predict pose """
         ang1 = ang2 = ang3 = ang4 = None
-        is_pushup = False
-        is_plank = False
+        is_pushup = is_plank = is_squat = False
 
         # Calculate angle between lines shoulder-elbow, elbow-wrist
         if self.is_point_in_keypoints("left_shoulder") and \
@@ -141,6 +140,15 @@ class Pose():
         else:
             pass
 
+        left_knee_ankle = self.is_point_in_keypoints("left_knee") and self.is_point_in_keypoints("left_ankle")
+        right_knee_ankle = self.is_point_in_keypoints("right_knee") and self.is_point_in_keypoints("right_ankle")
+        if left_knee_ankle or right_knee_ankle:
+            knee = "left_knee" if left_knee_ankle else "right_knee"
+            ankle = "left_ankle" if left_knee_ankle else "right_ankle"
+            ang5 = self.one_line_angle(knee, ankle)
+        else:
+            pass
+
         if ang3 is not None and ((0 <= ang3 <= 50) or (130 <= ang3 <= 180)):
             if (ang1 is not None or ang2 is not None) and ang4 is not None:
                 if (160 <= ang2 <= 180) or (0 <= ang2 <= 20):
@@ -157,15 +165,40 @@ class Pose():
             del self.ang4_tracker[0]
             if ang1_diff_mean < 5 and not 75 <= ang4_mean <= 105:
                 is_plank = True
-                is_pushup = False
+                is_pushup = is_squat = False
             else:
                 is_pushup = True
-                is_plank = False
+                is_plank = is_squat = False
+
+        # Distance algorithm
+        head_point = self.get_available_point(["nose", "left_ear", "right_ear", "left_eye", "right_eye"])
+        hip = self.get_available_point(["left_hip", "right_hip"])
+        foot = self.get_available_point(["left_foot_index", "right_foot_index", "left_heel", "right_heel", "left_ankle", "right_ankle"])
+        self.headpoint_tracker.append(head_point[1]) # height only
+        if ang3 is not None and ang5 is not None:
+            if ((70 <= ang3 <= 110) or (70 <= ang5 <= 110)) and len(self.headpoint_tracker) == 24:
+                height_mean = int(sum(self.headpoint_tracker) / len(self.headpoint_tracker))
+                height_norm = self.operation.normalize(height_mean, head_point[1], foot[1])
+                del self.headpoint_tracker[0]
+                if height_norm < 0:
+                    is_squat = True
+                    is_pushup = is_plank = False
+                else:
+                    is_squat = False
+        
+        if len(self.ang1_tracker) == 24:
+            del self.ang1_tracker[0]
+        if len(self.ang4_tracker) == 24:
+            del self.ang4_tracker[0]
+        if len(self.headpoint_tracker) == 24:
+            del self.headpoint_tracker[0]
 
         if is_pushup:
             return "Pushup"
         elif is_plank:
             return "Plank"
+        elif is_squat:
+            return "Squat"
 
         return None
 
