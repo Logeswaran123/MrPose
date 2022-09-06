@@ -1,8 +1,11 @@
 import cv2
+import datetime
 import mediapipe as mp
 from mediapipe.python.solutions.drawing_utils import _normalized_to_pixel_coordinates
+import random
 
 from utils.operation_utils import Operation
+from utils.timer_utils import Timer
 from utils.drawing_utils import Draw
 from utils.pose_utils.const import POSE, PRESENCE_THRESHOLD, VISIBILITY_THRESHOLD
 
@@ -18,8 +21,8 @@ class Pose():
         self.operation = Operation()
         self.pushup_counter = self.plank_counter = self.squat_counter = 0
         self.key_points = self.prev_pose = self.current_pose = None
-        self.pushups_ang1_tracker = []
-        self.pushups_ang4_tracker = []
+        self.ang1_tracker = []
+        self.ang4_tracker = []
         self.pose_tracker = []
         self.width = int(self.video_reader.get_frame_width())
         self.height = int(self.video_reader.get_frame_height())
@@ -142,16 +145,16 @@ class Pose():
             if (ang1 is not None or ang2 is not None) and ang4 is not None:
                 if (160 <= ang2 <= 180) or (0 <= ang2 <= 20):
                     self.pushup_counter += 1
-                    self.pushups_ang1_tracker.append(ang1)
-                    self.pushups_ang4_tracker.append(ang4)
+                    self.ang1_tracker.append(ang1)
+                    self.ang4_tracker.append(ang4)
 
-        if self.pushup_counter >= 24 and len(self.pushups_ang1_tracker) == 24 and len(self.pushups_ang4_tracker) == 24:
-            ang1_diff1 = abs(self.pushups_ang1_tracker[0] - self.pushups_ang1_tracker[12])
-            ang1_diff2 = abs(self.pushups_ang1_tracker[12] - self.pushups_ang1_tracker[23])
+        if self.pushup_counter >= 24 and len(self.ang1_tracker) == 24 and len(self.ang4_tracker) == 24:
+            ang1_diff1 = abs(self.ang1_tracker[0] - self.ang1_tracker[12])
+            ang1_diff2 = abs(self.ang1_tracker[12] - self.ang1_tracker[23])
             ang1_diff_mean = (ang1_diff1 + ang1_diff2) / 2
-            ang4_mean = sum(self.pushups_ang4_tracker) / len(self.pushups_ang4_tracker)
-            del self.pushups_ang1_tracker[0]
-            del self.pushups_ang4_tracker[0]
+            ang4_mean = sum(self.ang4_tracker) / len(self.ang4_tracker)
+            del self.ang1_tracker[0]
+            del self.ang4_tracker[0]
             if ang1_diff_mean < 5 and not 75 <= ang4_mean <= 105:
                 is_plank = True
                 is_pushup = False
@@ -265,6 +268,7 @@ class Pushup(Pose):
 
         out = cv2.VideoWriter("output.avi", self.fourcc, self.video_fps, (self.width, self.height))
         pushup_count_prev = pushup_count_current = progress_counter = 0
+        progress_bar_color = (255, 255, 255)
         while self.video_reader.is_opened():
             image = self.video_reader.read_frame()
             if image is None:
@@ -284,7 +288,7 @@ class Pushup(Pose):
 
             # progress bar
             image = cv2.rectangle(image, (0, self.height//8 - 10), (self.width//10 * progress_counter, self.height//8),
-                                        (255, 255, 255), cv2.FILLED)
+                                        progress_bar_color, cv2.FILLED)
             if results.pose_landmarks is not None:
                 self.key_points = self.get_keypoints(image, results)
                 self.pose_algorithm()
@@ -296,9 +300,166 @@ class Pushup(Pose):
                     progress_counter += 1
                     if progress_counter == 10:
                         progress_counter = 0
+                        progress_bar_color = random.choices(range(128, 256), k=3)
 
             out.write(image)
             cv2.imshow('Pushups', image)
+            if cv2.waitKey(5) & 0xFF == 27:
+                break
+        self.video_reader.release()
+
+
+class Plank(Pose):
+    """ Sub: Plank class """
+    def __init__(self, video_reader) -> None:
+        super().__init__(video_reader)
+        self.video_reader = video_reader
+        self.timer = Timer()
+        self.plank_counter = 0
+        self.start_time = None
+        self.total_time = 0
+
+    def _draw(self, image):
+        """ Draw lines between shoulder, wrist and foot """
+        left_shoulder_wrist_foot = self.is_point_in_keypoints("left_shoulder") and \
+                                    self.is_point_in_keypoints("left_elbow") and \
+                                    self.is_point_in_keypoints("left_foot_index")
+        right_shoulder_wrist_foot = self.is_point_in_keypoints("right_shoulder") and \
+                                    self.is_point_in_keypoints("right_elbow") and \
+                                    self.is_point_in_keypoints("right_foot_index")
+        if left_shoulder_wrist_foot:
+            image = self.draw.draw_line(image, self.get_point("left_shoulder"), self.get_point("left_elbow"))
+            image = self.draw.draw_line(image, self.get_point("left_elbow"), self.get_point("left_foot_index"))
+            image = self.draw.draw_line(image, self.get_point("left_foot_index"), self.get_point("left_shoulder"))
+        elif right_shoulder_wrist_foot:
+            image = self.draw.draw_line(image, self.get_point("right_shoulder"), self.get_point("right_elbow"))
+            image = self.draw.draw_line(image, self.get_point("right_elbow"), self.get_point("right_foot_index"))
+            image = self.draw.draw_line(image, self.get_point("right_foot_index"), self.get_point("right_shoulder"))
+        else:
+            pass
+        return image
+
+    def pose_algorithm(self):
+        """ Plank algorithm """
+        ang1 = ang2 = ang3 = ang4 = None
+        is_plank = False
+
+        # Calculate angle between lines shoulder-elbow, elbow-wrist
+        if self.is_point_in_keypoints("left_shoulder") and \
+            self.is_point_in_keypoints("left_elbow") and \
+            self.is_point_in_keypoints("left_wrist"):
+            ang1 = self.two_line_angle("left_shoulder", "left_elbow", "left_wrist")
+        elif self.is_point_in_keypoints("right_shoulder") and \
+            self.is_point_in_keypoints("right_elbow") and \
+            self.is_point_in_keypoints("right_wrist"):
+            ang1 = self.two_line_angle("right_shoulder", "right_elbow", "right_wrist")
+        else:
+            pass
+
+        # Calculate angle between lines shoulder-hip, hip-ankle
+        if self.is_point_in_keypoints("left_shoulder") and \
+            self.is_point_in_keypoints("left_hip") and \
+            self.is_point_in_keypoints("left_ankle"):
+            ang2 = self.two_line_angle("left_shoulder", "left_hip", "left_ankle")
+        elif self.is_point_in_keypoints("right_shoulder") and \
+            self.is_point_in_keypoints("right_hip") and \
+            self.is_point_in_keypoints("right_ankle"):
+            ang2 = self.two_line_angle("right_shoulder", "right_hip", "right_ankle")
+        else:
+            pass
+
+        # Calculate angle of line shoulder-ankle or hip-ankle
+        left_shoulder_ankle = self.is_point_in_keypoints("left_shoulder") and self.is_point_in_keypoints("left_ankle")
+        right_shoulder_ankle = self.is_point_in_keypoints("right_shoulder") and self.is_point_in_keypoints("right_ankle")
+        left_hip_ankle = self.is_point_in_keypoints("left_hip") and self.is_point_in_keypoints("left_ankle")
+        right_hip_ankle = self.is_point_in_keypoints("right_hip") and self.is_point_in_keypoints("right_ankle")
+        if left_shoulder_ankle or right_shoulder_ankle:
+            shoulder = "left_shoulder" if left_shoulder_ankle else "right_shoulder"
+            ankle = "left_ankle" if left_shoulder_ankle else "right_ankle"
+            ang3 = self.one_line_angle(shoulder, ankle)
+        elif left_hip_ankle or right_hip_ankle:
+            hip = "left_hip" if left_hip_ankle else "right_hip"
+            ankle = "left_ankle" if left_hip_ankle else "right_ankle"
+            ang3 = self.one_line_angle(hip, ankle)
+        else:
+            pass
+
+        # Calculate angle of line elbow-wrist
+        left_elbow_wrist = self.is_point_in_keypoints("left_elbow") and self.is_point_in_keypoints("left_wrist")
+        right_elbow_wrist = self.is_point_in_keypoints("right_elbow") and self.is_point_in_keypoints("right_wrist")
+        if left_elbow_wrist or right_elbow_wrist:
+            elbow = "left_elbow" if left_elbow_wrist else "right_elbow"
+            wrist = "left_wrist" if left_elbow_wrist else "right_wrist"
+            ang4 = self.one_line_angle(elbow, wrist)
+        else:
+            pass
+
+        if ang3 is not None and ((0 <= ang3 <= 50) or (130 <= ang3 <= 180)):
+            if (ang1 is not None or ang2 is not None) and ang4 is not None:
+                if (160 <= ang2 <= 180) or (0 <= ang2 <= 20):
+                    self.plank_counter += 1
+                    self.ang1_tracker.append(ang1)
+                    self.ang4_tracker.append(ang4)
+
+        if self.plank_counter >= 24 and len(self.ang1_tracker) == 24 and len(self.ang4_tracker) == 24:
+            ang1_diff1 = abs(self.ang1_tracker[0] - self.ang1_tracker[12])
+            ang1_diff2 = abs(self.ang1_tracker[12] - self.ang1_tracker[23])
+            ang1_diff_mean = (ang1_diff1 + ang1_diff2) / 2
+            ang4_mean = sum(self.ang4_tracker) / len(self.ang4_tracker)
+            del self.ang1_tracker[0]
+            del self.ang4_tracker[0]
+            if ang1_diff_mean < 5 and not 75 <= ang4_mean <= 105:
+                is_plank = True
+                if self.start_time is None:
+                    self.timer.start()
+                self.start_time = self.timer._start_time
+            else:
+                is_plank = False
+                if self.start_time is not None:
+                    self.timer.end()
+                    self.total_time = self.timer._total_time
+                self.start_time = None
+
+    def measure(self) -> None:
+        """ Measure planks (base function) """
+        if self.video_reader.is_opened() is False:
+            print("Error File Not Found.")
+
+        time_adjustment = 6 / self.video_fps # 6 is magic number
+        progress_counter = 0
+        progress_bar_color = (255, 255, 255)
+        out = cv2.VideoWriter("output.avi", self.fourcc, self.video_fps, (self.width, self.height))
+        while self.video_reader.is_opened():
+            image = self.video_reader.read_frame()
+            if image is None:
+                print("Ignoring empty camera frame.")
+                break
+
+            # To improve performance, optionally mark the image as not writeable to
+            # pass by reference.
+            image.flags.writeable = False
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            results = pose.process(image)
+
+            # overlay
+            image.flags.writeable = True
+            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+            image = self.draw.overlay(image)
+
+            # progress bar
+            image = cv2.rectangle(image, (0, self.height//8 - 10), (self.width//60 * progress_counter, self.height//8),
+                                        progress_bar_color, cv2.FILLED)
+            if results.pose_landmarks is not None:
+                self.key_points = self.get_keypoints(image, results)
+                self.pose_algorithm()
+                image = self._draw(image)
+                time = round(time_adjustment * (self.timer.get_current_time() + self.total_time), 2)
+                h_m_s_ms_time = self.timer.convert_time(time) # convert Seconds to Hour : Minute : Second : Milli-Second format
+                image = self.draw.pose_text(image, "Plank Timer: " + str(h_m_s_ms_time)[:10])
+                progress_counter = int(int(time) % self.video_fps)
+
+            out.write(image)
+            cv2.imshow('Planks', image)
             if cv2.waitKey(5) & 0xFF == 27:
                 break
         self.video_reader.release()
@@ -335,6 +496,7 @@ class Squat(Pose):
 
         out = cv2.VideoWriter("output.avi", self.fourcc, self.video_fps, (self.width, self.height))
         squads_count_prev = squad_count_current = progress_counter = 0
+        progress_bar_color = (255, 255, 255)
         while self.video_reader.is_opened():
             image = self.video_reader.read_frame()
             if image is None:
@@ -351,10 +513,11 @@ class Squat(Pose):
             image.flags.writeable = True
             image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
             image = self.draw.overlay(image)
+            image = self.draw.skeleton(image, results)
 
             # progress bar
             image = cv2.rectangle(image, (0, self.height//8 - 10), (self.width//10 * progress_counter, self.height//8),
-                                        (255, 255, 255), cv2.FILLED)
+                                        progress_bar_color, cv2.FILLED)
             if results.pose_landmarks is not None:
                 self.key_points = self.get_keypoints(image, results)
                 self.pose_algorithm()
@@ -365,6 +528,7 @@ class Squat(Pose):
                     progress_counter += 1
                     if progress_counter == 10:
                         progress_counter = 0
+                        progress_bar_color = random.choices(range(128, 256), k=3)
 
             out.write(image)
             cv2.imshow('Squats', image)
