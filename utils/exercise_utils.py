@@ -1,6 +1,6 @@
 import sys
 
-from utils.pose_utils.pose import Pose, Pushup, Plank, Squat
+from utils.pose_utils.pose import Pose, Pushup, Plank, Squat, Jumpingjack
 from utils.video_reader_utils import VideoReader
 
 class Exercise():

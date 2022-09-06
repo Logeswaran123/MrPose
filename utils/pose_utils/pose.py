@@ -1,7 +1,7 @@
+import random
 import cv2
 import mediapipe as mp
 from mediapipe.python.solutions.drawing_utils import _normalized_to_pixel_coordinates
-import random
 
 from utils.operation_utils import Operation
 from utils.timer_utils import Timer
@@ -88,7 +88,7 @@ class Pose():
     def predict_pose(self):
         """ Predict pose """
         ang1 = ang2 = ang3 = ang4 = None
-        is_pushup = is_plank = is_squat = False
+        is_pushup = is_plank = is_squat = is_jumping_jack = False
 
         # Calculate angle between lines shoulder-elbow, elbow-wrist
         if self.is_point_in_keypoints("left_shoulder") and \
@@ -140,12 +140,23 @@ class Pose():
         else:
             pass
 
+        # Calculate angle of line knee-ankle
         left_knee_ankle = self.is_point_in_keypoints("left_knee") and self.is_point_in_keypoints("left_ankle")
         right_knee_ankle = self.is_point_in_keypoints("right_knee") and self.is_point_in_keypoints("right_ankle")
         if left_knee_ankle or right_knee_ankle:
             knee = "left_knee" if left_knee_ankle else "right_knee"
             ankle = "left_ankle" if left_knee_ankle else "right_ankle"
             ang5 = self.one_line_angle(knee, ankle)
+        else:
+            pass
+
+         # Calculate angle of line hip-knee
+        left_hip_knee = self.is_point_in_keypoints("left_hip") and self.is_point_in_keypoints("left_knee")
+        right_hip_knee = self.is_point_in_keypoints("right_hip") and self.is_point_in_keypoints("right_knee")
+        if left_hip_knee or right_hip_knee:
+            knee = "left_knee" if left_hip_knee else "right_knee"
+            hip = "left_hip" if left_hip_knee else "right_hip"
+            ang6 = self.one_line_angle(hip, knee)
         else:
             pass
 
@@ -165,27 +176,37 @@ class Pose():
             del self.ang4_tracker[0]
             if ang1_diff_mean < 5 and not 75 <= ang4_mean <= 105:
                 is_plank = True
-                is_pushup = is_squat = False
+                is_pushup = is_squat = is_jumping_jack = False
             else:
                 is_pushup = True
-                is_plank = is_squat = False
+                is_plank = is_squat = is_jumping_jack = False
 
         # Distance algorithm
         head_point = self.get_available_point(["nose", "left_ear", "right_ear", "left_eye", "right_eye"])
         hip = self.get_available_point(["left_hip", "right_hip"])
+        knee = self.get_available_point(["left_knee", "right_knee"])
         foot = self.get_available_point(["left_foot_index", "right_foot_index", "left_heel", "right_heel", "left_ankle", "right_ankle"])
         self.headpoint_tracker.append(head_point[1]) # height only
+
+        hand_point = self.get_available_point(["left_wrist", "right_wrist", "left_pinky", "right_pinky", "left_index", "right_index"])
+        diff_head_hand_y = head_point[1] - hand_point[1]
         if ang3 is not None and ang5 is not None:
             if ((70 <= ang3 <= 110) or (70 <= ang5 <= 110)) and len(self.headpoint_tracker) == 24:
                 height_mean = int(sum(self.headpoint_tracker) / len(self.headpoint_tracker))
                 height_norm = self.operation.normalize(height_mean, head_point[1], foot[1])
                 del self.headpoint_tracker[0]
-                if height_norm < 0:
+                if height_norm < 0 and diff_head_hand_y < 0 and not 70 <= abs(ang6) <= 110:
                     is_squat = True
-                    is_pushup = is_plank = False
+                    is_pushup = is_plank = is_jumping_jack = False
                 else:
                     is_squat = False
-        
+
+        if diff_head_hand_y > 0 and 80 <= ang3 <= 100:
+            is_jumping_jack = True
+            is_pushup = is_plank = is_squat = False
+        if diff_head_hand_y < 0 and is_jumping_jack is True:
+            is_jumping_jack = False
+
         if len(self.ang1_tracker) == 24:
             del self.ang1_tracker[0]
         if len(self.ang4_tracker) == 24:
@@ -199,6 +220,8 @@ class Pose():
             return "Plank"
         elif is_squat:
             return "Squat"
+        elif is_jumping_jack:
+            return "JumpingJack"
 
         return None
 
@@ -375,7 +398,6 @@ class Plank(Pose):
     def pose_algorithm(self):
         """ Plank algorithm """
         ang1 = ang2 = ang3 = ang4 = None
-        is_plank = False
 
         # Calculate angle between lines shoulder-elbow, elbow-wrist
         if self.is_point_in_keypoints("left_shoulder") and \
@@ -442,12 +464,12 @@ class Plank(Pose):
             del self.ang1_tracker[0]
             del self.ang4_tracker[0]
             if ang1_diff_mean < 5 and not 75 <= ang4_mean <= 105:
-                is_plank = True
+                # is_plank = True
                 if self.start_time is None:
                     self.timer.start()
                 self.start_time = self.timer._start_time
             else:
-                is_plank = False
+                # is_plank = False
                 if self.start_time is not None:
                     self.timer.end()
                     self.total_time = self.timer._total_time
@@ -565,6 +587,96 @@ class Squat(Pose):
 
             out.write(image)
             cv2.imshow('Squats', image)
+            if cv2.waitKey(5) & 0xFF == 27:
+                break
+        self.video_reader.release()
+
+
+class Jumpingjack(Pose):
+    """ Sub: JumpingJack class """
+    def __init__(self, video_reader) -> None:
+        super().__init__(video_reader)
+        self.video_reader = video_reader
+        self.jumping_jack_count = 0
+        self.is_jumping_jack = False
+
+    def pose_algorithm(self):
+        """ JumpingJack algorithm """
+        # Distance algorithm
+        hand_point = self.get_available_point(["left_wrist", "right_wrist", "left_pinky", "right_pinky", "left_index", "right_index"])
+        head_point = self.get_available_point(["nose", "left_ear", "right_ear", "left_eye", "right_eye"])
+        if head_point is None or hand_point is None:
+            return
+
+        diff_y = head_point[1] - hand_point[1]
+        norm_diff_y = self.operation.normalize(diff_y, 0, self.height)
+
+        # Angle algorithm
+        # Calculate angle of line shoulder-ankle or hip-ankle
+        left_shoulder_ankle = self.is_point_in_keypoints("left_shoulder") and self.is_point_in_keypoints("left_ankle")
+        right_shoulder_ankle = self.is_point_in_keypoints("right_shoulder") and self.is_point_in_keypoints("right_ankle")
+        left_hip_ankle = self.is_point_in_keypoints("left_hip") and self.is_point_in_keypoints("left_ankle")
+        right_hip_ankle = self.is_point_in_keypoints("right_hip") and self.is_point_in_keypoints("right_ankle")
+        if left_shoulder_ankle or right_shoulder_ankle:
+            shoulder = "left_shoulder" if left_shoulder_ankle else "right_shoulder"
+            ankle = "left_ankle" if left_shoulder_ankle else "right_ankle"
+            ang = self.one_line_angle(shoulder, ankle)
+        elif left_hip_ankle or right_hip_ankle:
+            hip = "left_hip" if left_hip_ankle else "right_hip"
+            ankle = "left_ankle" if left_hip_ankle else "right_ankle"
+            ang = self.one_line_angle(hip, ankle)
+        else:
+            pass
+
+        if norm_diff_y > 0 and 80 <= ang <= 100:
+            self.is_jumping_jack = True
+        if norm_diff_y < 0 and self.is_jumping_jack is True:
+            self.jumping_jack_count += 1
+            self.is_jumping_jack = False
+
+    def measure(self) -> None:
+        """ Measure JumpingJacks (base function) """
+        if self.video_reader.is_opened() is False:
+            print("Error File Not Found.")
+
+        out = cv2.VideoWriter("output.avi", self.fourcc, self.video_fps, (self.width, self.height))
+        jj_count_prev = jj_count_current = progress_counter = 0
+        progress_bar_color = (255, 255, 255)
+        while self.video_reader.is_opened():
+            image = self.video_reader.read_frame()
+            if image is None:
+                print("Ignoring empty camera frame.")
+                break
+
+            # To improve performance, optionally mark the image as not writeable to
+            # pass by reference.
+            image.flags.writeable = False
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            results = pose.process(image)
+
+            # overlay
+            image.flags.writeable = True
+            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+            image = self.draw.overlay(image)
+            image = self.draw.skeleton(image, results)
+
+            # progress bar
+            image = cv2.rectangle(image, (0, self.height//8 - 10), (self.width//10 * progress_counter, self.height//8),
+                                        progress_bar_color, cv2.FILLED)
+            if results.pose_landmarks is not None:
+                self.key_points = self.get_keypoints(image, results)
+                self.pose_algorithm()
+                image = self.draw.pose_text(image, "JumpingJacks Count: " + str(self.jumping_jack_count))
+                jj_count_prev = jj_count_current
+                jj_count_current = self.jumping_jack_count
+                if self.jumping_jack_count > 0 and abs(jj_count_current - jj_count_prev) == 1:
+                    progress_counter += 1
+                    if progress_counter == 10:
+                        progress_counter = 0
+                        progress_bar_color = random.choices(range(128, 256), k=3)
+
+            out.write(image)
+            cv2.imshow('JumpingJacks', image)
             if cv2.waitKey(5) & 0xFF == 27:
                 break
         self.video_reader.release()

@@ -69,6 +69,6 @@ class Timer:
         except ZeroDivisionError:
             return 0
 
-    def convert_time(self, time):
+    def convert_time(self, time_in_sec):
         """ Convert to seconds to readable format """
-        return datetime.timedelta(seconds=time)
+        return datetime.timedelta(seconds=time_in_sec)
