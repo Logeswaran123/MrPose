@@ -1,7 +1,7 @@
 # :weight_lifting_man: Mr.Pose :weight_lifting_woman:
 
 <p>
-Hi human,
+Hi human, <br>
 I'm Mr.Pose :robot:. I'm a tool for estimation and measurement of exercises for humans.
 </p>
 
