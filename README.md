@@ -30,7 +30,16 @@ For Plank, Mr.Pose will track the time of plank position.
 ** TODO **
 
 ## How to run :running_man:
-** TODO **
+```python
+python mrpose.py --video <path to video file> --exercise <exercise to be measured>
+```
+Note:<br />
+
+*<path to video file\>* - Path to the input video file with supported exercise<br />
+*<exercise to be measured\>* - Exercise in input video file<br />
+
+Optional Argument:
+*--exercise* - If argument is not provided, then Mr.Pose will **predict** the exercise done in the video. If argument is provided, Mr.Pose will measure the exercise mentioned.
 
 ## Results :bar_chart:
 
