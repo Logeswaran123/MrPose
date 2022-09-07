@@ -2,14 +2,14 @@
 
 <p>
 Hi human, <br>
-I'm Mr.Pose :robot:. I'm a tool for estimation and measurement of exercises for humans.
+I'm Mr.Pose :robot:. I'm an application for estimation and measurement of exercises for humans.
 </p>
 
 ## Description :scroll:
 
 Exercises, in general, helps to maintain a physically fit body, loosen up joints, and relax muscles.
 
-Mr.Pose is a visual analytics tool that helps humans to track the accuracy of exercise, and count reps. <br>
+Mr.Pose is a visual analytics application that helps humans to track the accuracy of exercise, and count reps. <br>
 
 Mr.Pose can support <br>
 * Pushup
