@@ -72,5 +72,19 @@ https://user-images.githubusercontent.com/36563521/188866384-a19d3bb7-d6d2-47be-
 Input video source [here](https://www.pexels.com/video/woman-exercising-while-wearing-a-face-mask-4265287/).
 ---
 
+<p align="center"><b> Plank </b></p>
+<br />
+
+```python
+python mrpose.py --video <path to video file> --exercise plank
+```
+
+<br />
+
+https://user-images.githubusercontent.com/36563521/188879832-825cfd00-cfd3-4b9c-9d99-b73c4a06b8a9.mp4
+
+Input video source [here](https://www.pexels.com/video/female-doing-planks-by-the-balcony-6152665/).
+---
+
 ## References :page_facing_up:
 ** TODO **
