@@ -91,6 +91,11 @@ python mrpose.py --video <path to video file> --exercise jumpingjack
 
 <br />
 
+https://user-images.githubusercontent.com/36563521/188893014-afed7b58-6688-4e19-ba59-7a471c0fb7a0.mp4
+
+Input video source [here](https://www.pexels.com/video/elderly-man-doing-jumping-jacks-outside-7299359/).
+---
+
 ## References :page_facing_up:
 
 * [Mediapipe by Google](https://github.com/google/mediapipe).
