@@ -18,5 +18,5 @@ Mr.Pose can support <br>
 * JumpingJack
 
 <br>
-For Pushup, Plank and JumpingJack, each repetition is tracked by Mr.Pose provided that the exercise is accurately performed.
+For Pushup, Plank and JumpingJack, Mr.Pose will track each repetition provided that the exercise is accurately performed.
 For Plank, Mr.Pose will track the time of plank position.
