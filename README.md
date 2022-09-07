@@ -44,8 +44,7 @@ If argument is not provided, then Mr.Pose will **predict** the exercise done in 
 
 ## Results :bar_chart:
 
-<p align="center"><b> Pushups </b></p>
-<br />
+<p align="center"> :star: <b> Pushups </b> :star: </p>
 
 ```python
 python mrpose.py --video <path to video file> --exercise pushup
@@ -58,8 +57,7 @@ https://user-images.githubusercontent.com/36563521/188864300-bc43d096-c98f-48e4-
 Input video source [here](https://www.pexels.com/video/woman-doing-push-ups-8472764/).
 ---
 
-<p align="center"><b> Squats </b></p>
-<br />
+<p align="center"> :star: <b> Squats </b> :star: </p>
 
 ```python
 python mrpose.py --video <path to video file> --exercise squat
@@ -72,8 +70,7 @@ https://user-images.githubusercontent.com/36563521/188866384-a19d3bb7-d6d2-47be-
 Input video source [here](https://www.pexels.com/video/woman-exercising-while-wearing-a-face-mask-4265287/).
 ---
 
-<p align="center"><b> Plank </b></p>
-<br />
+<p align="center"> :star: <b> Plank </b> :star: </p>
 
 ```python
 python mrpose.py --video <path to video file> --exercise plank
