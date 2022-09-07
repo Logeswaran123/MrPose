@@ -83,6 +83,14 @@ https://user-images.githubusercontent.com/36563521/188879832-825cfd00-cfd3-4b9c-
 Input video source [here](https://www.pexels.com/video/female-doing-planks-by-the-balcony-6152665/).
 ---
 
+<p align="center"> :star: <b> Jumping Jacks </b> :star: </p>
+
+```python
+python mrpose.py --video <path to video file> --exercise jumpingjack
+```
+
+<br />
+
 ## References :page_facing_up:
 
 * [Mediapipe by Google](https://github.com/google/mediapipe).
