@@ -34,10 +34,19 @@ For Plank, Mr.Pose will track the time of plank position.
 
 ## Results :bar_chart:
 
+**Pushups**
 
 https://user-images.githubusercontent.com/36563521/188864300-bc43d096-c98f-48e4-b9cb-6bef6937f1ca.mp4
 
 Input video source [here](https://www.pexels.com/video/woman-doing-push-ups-8472764/).
+---
+
+**Squats**
+
+https://user-images.githubusercontent.com/36563521/188866384-a19d3bb7-d6d2-47be-a71b-d27166dea395.mp4
+
+Input video source [here](https://www.pexels.com/video/woman-exercising-while-wearing-a-face-mask-4265287/).
+---
 
 ## References :page_facing_up:
 ** TODO **
