@@ -2,7 +2,7 @@
 
 <p>
 Hi human, <br>
-I'm Mr.Pose :robot:. I'm an application for estimation and measurement of exercises for humans.
+I'm Mr.Pose :robot:. I help to estimate and measure exercises for humans. Lets do some exercise and keep the body fit. :muscle: :mechanical_arm:
 </p>
 
 ## Description :scroll:
