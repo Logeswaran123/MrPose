@@ -27,3 +27,6 @@ For Plank, Mr.Pose will track the time of plank position.
 1. Record a video of person doing a supported exercise.
 2. Place the camera horizontally facing the person performing exercise (preferably at eye level).
 3. Higher the resolution of video, higher the quality of estimation and measurement.
+
+## How to run :running_man:
+** TODO **
