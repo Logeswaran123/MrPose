@@ -1,2 +1,6 @@
 # MrPose
-An application to help with exercises
+
+<p>
+A tool for estimation and measurement of exercises for humans. :weight_lifting_woman:
+</p>
+
