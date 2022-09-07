@@ -1,8 +1,8 @@
 # :weight_lifting_man: Mr.Pose :weight_lifting_woman:
 
 <p>
-Hi human, <br>
-I'm Mr.Pose! :robot: :wave: <br>
+Hi human, <br />
+I'm Mr.Pose! :robot: :wave: <br />
 I help to estimate and measure exercises for humans. Lets do some exercise and keep the body fit. :muscle: :mechanical_arm:
 </p>
 
@@ -10,9 +10,9 @@ I help to estimate and measure exercises for humans. Lets do some exercise and k
 
 Exercises, in general, helps to maintain a physically fit body, loosen up joints, and relax muscles.
 
-Mr.Pose is a visual analytics application that helps humans to track the accuracy of exercise, and count reps. <br>
+Mr.Pose is a visual analytics application that helps humans to track the accuracy of exercise, and count reps. <br />
 
-Mr.Pose can support <br>
+Mr.Pose can support <br />
 * Pushup
 * Plank
 * Squat
@@ -39,7 +39,8 @@ Note:<br />
 *<exercise to be measured\>* - Exercise in input video file<br />
 
 **Optional Argument:**<br />
-*--exercise* - If argument is not provided, then Mr.Pose will **predict** the exercise done in the video. If argument is provided, then Mr.Pose will measure the exercise mentioned.
+*--exercise* - Choices: pushup, plank, squat, jumpingjack <br />
+If argument is not provided, then Mr.Pose will **predict** the exercise done in the video. If argument is provided, then Mr.Pose will measure the exercise mentioned.
 
 ## Results :bar_chart:
 
