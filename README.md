@@ -11,12 +11,11 @@ Exercises, in general, helps to maintain a physically fit body, loosen up joints
 
 Mr.Pose is a visual analytics tool that helps humans to track the accuracy of exercise, and count reps. <br>
 Currently, Mr.Pose can support <br>
-**
 * Pushup
 * Plank
 * Squat
 * JumpingJack
-**
 
+<br>
 For Pushup, Plank and JumpingJack, each repetition is tracked by Mr.Pose provided that the exercise is accurately performed.
 For Plank, Mr.Pose will track the time of plank position.
