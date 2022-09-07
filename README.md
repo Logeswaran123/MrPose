@@ -1,7 +1,8 @@
 # :weight_lifting_man: Mr.Pose :weight_lifting_woman:
 
 <p>
-A tool for estimation and measurement of exercises for humans.
+Hi I'm Mr.Pose :robot:, <br>
+I'm a tool for estimation and measurement of exercises for humans.
 </p>
 
 ## Description
