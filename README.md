@@ -46,10 +46,13 @@ If argument is not provided, then Mr.Pose will **predict** the exercise done in 
 
 <p align="center"><b> Pushups </b></p>
 <br />
+
 ```python
 python mrpose.py --video <path to video file> --exercise pushup
 ```
+
 <br />
+
 https://user-images.githubusercontent.com/36563521/188864300-bc43d096-c98f-48e4-b9cb-6bef6937f1ca.mp4
 
 Input video source [here](https://www.pexels.com/video/woman-doing-push-ups-8472764/).
@@ -57,10 +60,13 @@ Input video source [here](https://www.pexels.com/video/woman-doing-push-ups-8472
 
 <p align="center"><b> Squats </b></p>
 <br />
+
 ```python
 python mrpose.py --video <path to video file> --exercise squat
 ```
+
 <br />
+
 https://user-images.githubusercontent.com/36563521/188866384-a19d3bb7-d6d2-47be-a71b-d27166dea395.mp4
 
 Input video source [here](https://www.pexels.com/video/woman-exercising-while-wearing-a-face-mask-4265287/).
