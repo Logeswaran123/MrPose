@@ -21,13 +21,13 @@ Mr.Pose can support <br>
 For Pushup, Plank and JumpingJack, Mr.Pose will track each repetition provided that the exercise is accurately performed.
 For Plank, Mr.Pose will track the time of plank position.
 
-## Code Requirements :mage_woman:
-** TODO **
-
 ## General Requirements :mage_man:
 1. Record a video of person doing a supported exercise.
 2. Place the camera horizontally facing the person performing exercise (preferably at eye level).
 3. Higher the resolution of video, higher the quality of estimation and measurement.
+
+## Code Requirements :mage_woman:
+** TODO **
 
 ## How to run :running_man:
 ** TODO **
