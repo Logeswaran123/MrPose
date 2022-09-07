@@ -27,7 +27,9 @@ For Plank, Mr.Pose will track the time of plank position.
 3. Higher the resolution of video, higher the quality of estimation and measurement.
 
 ## Code Requirements :mage_woman:
-** TODO **
+```python
+pip install -r requirements.txt
+```
 
 ## How to run :running_man:
 ```python
