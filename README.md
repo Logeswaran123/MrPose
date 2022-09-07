@@ -84,4 +84,8 @@ Input video source [here](https://www.pexels.com/video/female-doing-planks-by-th
 ---
 
 ## References :page_facing_up:
-** TODO **
+
+* [Mediapipe by Google](https://github.com/google/mediapipe).
+* [GymLytics](https://github.com/akshaybahadur21/GymLytics).
+
+Happy Learning! 😄
