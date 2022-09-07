@@ -33,7 +33,7 @@ For Plank, Mr.Pose will track the time of plank position.
 ** TODO **
 
 ## Results :bar_chart:
-[Demo](https://github.com/Logeswaran123/MrPose/blob/main/data/videos/output/out_pushup_1.mp4)
+https://github.com/Logeswaran123/MrPose/blob/main/data/videos/output/out_pushup_1.mp4
 
 ## References :page_facing_up:
 ** TODO **
