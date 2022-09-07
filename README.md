@@ -39,20 +39,28 @@ Note:<br />
 *<exercise to be measured\>* - Exercise in input video file<br />
 
 **Optional Argument:**<br />
-*--exercise* - Choices: pushup, plank, squat, jumpingjack <br />
+*--exercise* - Choices are pushup, plank, squat, jumpingjack <br />
 If argument is not provided, then Mr.Pose will **predict** the exercise done in the video. If argument is provided, then Mr.Pose will measure the exercise mentioned.
 
 ## Results :bar_chart:
 
 <p align="center"><b> Pushups </b></p>
-
+<br />
+```python
+python mrpose.py --video <path to video file> --exercise pushup
+```
+<br />
 https://user-images.githubusercontent.com/36563521/188864300-bc43d096-c98f-48e4-b9cb-6bef6937f1ca.mp4
 
 Input video source [here](https://www.pexels.com/video/woman-doing-push-ups-8472764/).
 ---
 
 <p align="center"><b> Squats </b></p>
-
+<br />
+```python
+python mrpose.py --video <path to video file> --exercise squat
+```
+<br />
 https://user-images.githubusercontent.com/36563521/188866384-a19d3bb7-d6d2-47be-a71b-d27166dea395.mp4
 
 Input video source [here](https://www.pexels.com/video/woman-exercising-while-wearing-a-face-mask-4265287/).
