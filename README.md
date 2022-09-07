@@ -39,7 +39,7 @@ Note:<br />
 *<exercise to be measured\>* - Exercise in input video file<br />
 
 **Optional Argument:**<br />
-*--exercise* - If argument is not provided, then Mr.Pose will **predict** the exercise done in the video. If argument is provided, Mr.Pose will measure the exercise mentioned.
+*--exercise* - If argument is not provided, then Mr.Pose will **predict** the exercise done in the video. If argument is provided, then Mr.Pose will measure the exercise mentioned.
 
 ## Results :bar_chart:
 
