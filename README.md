@@ -41,6 +41,8 @@ Note:<br />
 *<exercise to be measured\>* - Exercise in input video file<br />
 
 **Optional Argument:**<br />
+*--video* - Path to video source file. <br />
+If argument is not provided, then Mr.Pose will launch webcam for live video. Currently, live webcam video works only for exercise prediction. <br />
 *--exercise* - Choices are pushup, plank, squat, jumpingjack <br />
 If argument is not provided, then Mr.Pose will **predict** the exercise done in the video. If argument is provided, then Mr.Pose will measure the exercise mentioned.
 
