@@ -89,6 +89,7 @@ class Pose():
         """ Predict pose """
         ang1 = ang2 = ang3 = ang4 = None
         is_pushup = is_plank = is_squat = is_jumping_jack = False
+        diff_head_hand_y = None
 
         # Calculate angle between lines shoulder-elbow, elbow-wrist
         if self.is_point_in_keypoints("left_shoulder") and \
@@ -186,11 +187,12 @@ class Pose():
         hip = self.get_available_point(["left_hip", "right_hip"])
         knee = self.get_available_point(["left_knee", "right_knee"])
         foot = self.get_available_point(["left_foot_index", "right_foot_index", "left_heel", "right_heel", "left_ankle", "right_ankle"])
-        self.headpoint_tracker.append(head_point[1]) # height only
 
         hand_point = self.get_available_point(["left_wrist", "right_wrist", "left_pinky", "right_pinky", "left_index", "right_index"])
-        diff_head_hand_y = head_point[1] - hand_point[1]
-        if ang3 is not None and ang5 is not None:
+        if head_point is not None and hand_point is not None:
+            self.headpoint_tracker.append(head_point[1]) # height only
+            diff_head_hand_y = head_point[1] - hand_point[1]
+        if ang3 is not None and ang5 is not None and diff_head_hand_y is not None:
             if ((70 <= ang3 <= 110) or (70 <= ang5 <= 110)) and len(self.headpoint_tracker) == 24:
                 height_mean = int(sum(self.headpoint_tracker) / len(self.headpoint_tracker))
                 height_norm = self.operation.normalize(height_mean, head_point[1], foot[1])
@@ -201,11 +203,12 @@ class Pose():
                 else:
                     is_squat = False
 
-        if diff_head_hand_y > 0 and 80 <= ang3 <= 100:
-            is_jumping_jack = True
-            is_pushup = is_plank = is_squat = False
-        if diff_head_hand_y < 0 and is_jumping_jack is True:
-            is_jumping_jack = False
+        if diff_head_hand_y is not None and ang3 is not None:
+            if diff_head_hand_y > 0 and 80 <= ang3 <= 100:
+                is_jumping_jack = True
+                is_pushup = is_plank = is_squat = False
+            if diff_head_hand_y < 0 and is_jumping_jack is True:
+                is_jumping_jack = False
 
         if len(self.ang1_tracker) == 24:
             del self.ang1_tracker[0]
