@@ -106,8 +106,11 @@ Input video source [here](https://www.pexels.com/video/elderly-man-doing-jumping
 python mrpose.py --video <path to video file>
 ```
 
-** TODO: Add result video **
 <br />
+
+https://user-images.githubusercontent.com/36563521/190898949-a88b0d72-5a5a-43ec-b1dc-475a9744b6e6.mp4
+
+---
 
 ## References :page_facing_up:
 
