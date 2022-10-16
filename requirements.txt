@@ -1,5 +1,5 @@
 argparse==1.1
 mediapipe==0.8.10.1
 numpy==1.21.5
-opencv-python==4.6.0
+opencv-python==4.6.0.66
 Pillow==9.0.1
