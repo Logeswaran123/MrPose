@@ -1,4 +1,5 @@
 # :weight_lifting_man: Mr.Pose :weight_lifting_woman:
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/Logeswaran123/MrPose/blob/main/LICENSE)
 ![alt text](https://github.com/Logeswaran123/MrPose/blob/main/data/images/Pose_DALL%C2%B7E.png "Pose DALL.E")
 <p>
 Hi human, <br />
